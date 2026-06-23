@@ -15,7 +15,7 @@
   }
 
   .ticker-wrap {
-    width: 100%;
+    width: 1080px;
     position: relative;
     overflow: hidden;
     background: #0c0c10;
@@ -30,6 +30,7 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, #c9a84c 40%, #f0d080 50%, #c9a84c 60%, transparent);
     opacity: 0.6;
+    z-index: 2;
   }
   .ticker-wrap::after {
     content: '';
@@ -38,6 +39,7 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, #c9a84c 40%, #f0d080 50%, #c9a84c 60%, transparent);
     opacity: 0.6;
+    z-index: 2;
   }
 
   .fade-left {
@@ -59,6 +61,7 @@
     white-space: nowrap;
     padding: 18px 0;
     will-change: transform;
+    position: relative;
   }
 
   .ticker-item {
@@ -109,7 +112,7 @@
   ];
 
   const track = document.getElementById('track');
-  const speedPx = 38;
+  const speed = 38; // px per second
 
   function buildSet() {
     const frag = document.createDocumentFragment();
@@ -126,20 +129,27 @@
     return frag;
   }
 
+  // Build enough sets
   for (let i = 0; i < 6; i++) track.appendChild(buildSet());
 
+  // Wait for render, then start rAF loop
   requestAnimationFrame(() => {
     const halfWidth = track.scrollWidth / 2;
-    const duration = halfWidth / speedPx;
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes ticker {
-        0%   { transform: translateX(0); }
-        100% { transform: translateX(-${halfWidth}px); }
+    let pos = 0;
+    let last = null;
+
+    function tick(ts) {
+      if (last !== null) {
+        const delta = (ts - last) / 1000; // seconds
+        pos += speed * delta;
+        if (pos >= halfWidth) pos -= halfWidth;
+        track.style.transform = `translateX(-${pos}px)`;
       }
-    `;
-    document.head.appendChild(style);
-    track.style.animation = `ticker ${duration}s linear infinite`;
+      last = ts;
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
   });
 </script>
 
