@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NightWither – TikTok Ticker</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .ticker-wrap {
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    overflow: hidden;
+    background: #0c0c10;
+    border-top: 1px solid rgba(201,168,76,0.4);
+    border-bottom: 1px solid rgba(201,168,76,0.4);
+  }
+
+  .ticker-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a84c 40%, #f0d080 50%, #c9a84c 60%, transparent);
+    opacity: 0.7;
+  }
+  .ticker-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a84c 40%, #f0d080 50%, #c9a84c 60%, transparent);
+    opacity: 0.7;
+  }
+
+  .fade-left {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 30px;
+    background: linear-gradient(90deg, #0c0c10, transparent);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .fade-right {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 30px;
+    background: linear-gradient(270deg, #0c0c10, transparent);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .ticker-track {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 8px 0;
+    /* JS setzt die Animation dynamisch */
+    will-change: transform;
+  }
+
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 10px;
+    flex-shrink: 0;
+  }
+
+  .t-icon { font-size: 12px; line-height: 1; flex-shrink: 0; }
+
+  .t-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #c0c0c0;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .t-text strong { color: #c9a84c; font-weight: 700; }
+
+  .ticker-sep {
+    color: rgba(201,168,76,0.4);
+    font-size: 9px;
+    padding: 0 1px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="ticker-wrap">
+  <div class="fade-left"></div>
+  <div class="fade-right"></div>
+  <div class="ticker-track" id="track"></div>
+</div>
+
+<script>
+  const items = [
+    { icon: '🎮', text: 'Mit mir zocken? <strong>So geht\'s!</strong>' },
+    { icon: '🔞', text: '<strong>18+</strong>' },
+    { icon: '👤', text: '<strong>Kanal folgen</strong>' },
+    { icon: '💬', text: '<strong>Kommentieren</strong>' },
+    { icon: '📲', text: '<strong>Stream teilen</strong>' },
+  ];
+
+  const track = document.getElementById('track');
+  const wrapWidth = track.parentElement.offsetWidth;
+  const speedPx = 38; // px per second
+
+  function buildSet() {
+    const frag = document.createDocumentFragment();
+    items.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'ticker-item';
+      div.innerHTML = `<span class="t-icon">${item.icon}</span><span class="t-text">${item.text}</span>`;
+      frag.appendChild(div);
+      const sep = document.createElement('div');
+      sep.className = 'ticker-sep';
+      sep.textContent = '◆';
+      frag.appendChild(sep);
+    });
+    return frag;
+  }
+
+  // Build enough sets to fill at least 3x the wrapper width
+  for (let i = 0; i < 6; i++) track.appendChild(buildSet());
+
+  // After render, measure one set width and animate
+  requestAnimationFrame(() => {
+    const totalWidth = track.scrollWidth;
+    const halfWidth = totalWidth / 2;
+    const duration = halfWidth / speedPx; // seconds
+
+    track.style.animation = `ticker ${duration}s linear infinite`;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes ticker {
+        0%   { transform: translateX(0); }
+        100% { transform: translateX(-${halfWidth}px); }
+      }
+    `;
+    document.head.appendChild(style);
+  });
+</script>
+
+</body>
+</html>
